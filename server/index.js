@@ -40,7 +40,11 @@ app.post('/api/check', async (req, res) => {
     // Satu browser instance untuk semua pengecekan
     const headless = process.env.PUPPETEER_HEADLESS !== 'false';
     const args = process.env.PUPPETEER_ARGS ? process.env.PUPPETEER_ARGS.split(',') : ['--no-sandbox','--disable-setuid-sandbox'];
-    const browser = await puppeteer.launch({ headless, args });
+    const browser = await puppeteer.launch({
+    headless: "new",
+    args,
+    });
+
 
     async function checkOneTab(url) {
       let page;
