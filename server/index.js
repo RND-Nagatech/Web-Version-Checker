@@ -92,7 +92,7 @@ app.post('/api/check', async (req, res) => {
           const endTime = Date.now();
           const duration = ((endTime - startTime) / 1000).toFixed(2);
           console.log(`[CHECK] ${url} selesai dalam ${duration} detik (percobaan ke-${attempt})`);
-          return { url, ...data, duration: Number(duration), attempt };
+          return { url, ...data };
         } catch (err) {
           const endTime = Date.now();
           const duration = ((endTime - startTime) / 1000).toFixed(2);
@@ -105,12 +105,12 @@ app.post('/api/check', async (req, res) => {
           if (attempt < 3 && friendly === 'Koneksi terlalu lama / timeout') {
             continue;
           } else {
-            return { url, error: friendly, duration: Number(duration), attempt };
+            return { url, error: friendly };
           }
         }
       }
       // Jika tetap gagal setelah 3 percobaan
-      return { url, error: lastError, duration: Number(lastDuration), attempt: 3 };
+      return { url, error: lastError };
     }
 
     async function runBatch(items, fn, batchSize) {
