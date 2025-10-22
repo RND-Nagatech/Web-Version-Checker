@@ -18,6 +18,9 @@ PUPPETEER_ARGS=--no-sandbox,--disable-setuid-sandbox
 NAVIGATION_TIMEOUT=90000
 WAIT_TIMEOUT=30000
 DELAY_MS=2000
+
+# Concurrency Configuration
+CHECK_CONCURRENCY=10
 ```
 
 ### Client (.env)
