@@ -1,3 +1,36 @@
+/* Custom scrollbar for textarea inside kotak URL */
+/* Custom scrollbar for textarea inside kotak URL (force override) */
+/* Custom scrollbar for textarea inside kotak URL (force override) */
+/* Custom scrollbar for textarea wrapper (inside kotak URL) */
+.textarea-scrollbar {
+  overflow-y: auto;
+}
+.textarea-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  border-radius: 1rem;
+}
+.textarea-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 1rem;
+}
+.textarea-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #6366f1, #8b5cf6);
+  border-radius: 1rem;
+}
+.textarea-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #4f46e5, #7c3aed);
+}
+.dark .textarea-scrollbar::-webkit-scrollbar-track {
+  background: #374151;
+  border-radius: 1rem;
+}
+.dark .textarea-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #818cf8, #a78bfa);
+  border-radius: 1rem;
+}
+.dark .textarea-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #6366f1, #8b5cf6);
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

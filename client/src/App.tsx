@@ -1,3 +1,18 @@
+// Modern Toastify-style Toast component
+function Toast({ message, type = 'success' }: { message: string; type?: 'error' | 'success' }) {
+  return (
+    <div
+      className={`fixed top-8 left-1/2 z-50 transform -translate-x-1/2 min-w-[220px] max-w-xs px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-fade-in-fast bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 ${type === 'error' ? 'border-red-300 text-red-700 dark:text-red-300' : 'border-green-300 text-green-700 dark:text-green-300'}`}
+      style={{
+        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+        backdropFilter: 'blur(8px)',
+      }}
+    >
+      <span className={`text-xl ${type === 'error' ? 'text-red-400' : 'text-green-400'}`}>{type === 'error' ? '❌' : '✅'}</span>
+      <span className="font-medium text-base flex-1">{message}</span>
+    </div>
+  );
+}
 import React, { useState, useEffect } from 'react'
 import { CheckIcon, CloudIcon, MoonIcon, SunIcon } from './icons'
 
@@ -9,6 +24,14 @@ type Result = {
 }
 
 export default function App() {
+  const [toast, setToast] = useState<{ message: string; type?: 'error' | 'success' } | null>(null);
+  // Auto-dismiss toast after 3 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
   const [urlsText, setUrlsText] = useState('');
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(false);
@@ -32,7 +55,7 @@ export default function App() {
   const start = async () => {
     const lines = urlsText.split('\n').map(s => s.trim()).filter(Boolean);
     if (lines.length === 0) {
-      alert('Masukkan minimal 1 URL');
+      setToast({ message: 'Masukkan minimal 1 URL', type: 'error' });
       return;
     }
     setLoading(true);
@@ -59,7 +82,7 @@ export default function App() {
       setResults(data.results || []);
       localStorage.setItem('lastResults', JSON.stringify(data.results || []));
     } catch (err:any) {
-      alert('Gagal: ' + err.message);
+      setToast({ message: 'Gagal: ' + err.message, type: 'error' });
     } finally {
       setLoading(false);
       setTimeout(() => setProgress(0), 1000);
@@ -114,6 +137,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100 relative overflow-hidden">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+        />
+      )}
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5 dark:opacity-10">
         <div className="absolute inset-0" style={{
@@ -130,7 +159,17 @@ export default function App() {
             </button>
           </div>
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full mb-6 shadow-2xl animate-pulse">
-            <CloudIcon />
+            {/* Modern gradient checkmark logo */}
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="modern-check-gradient" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#6366F1" />
+                  <stop offset="1" stopColor="#A78BFA" />
+                </linearGradient>
+              </defs>
+              <circle cx="24" cy="24" r="22" fill="url(#modern-check-gradient)" />
+              <path d="M16 25.5L22 31.5L33 18.5" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
           <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4 animate-fade-in">
             Web Version Checker
@@ -178,13 +217,16 @@ export default function App() {
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1">
                 <label className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Website URLs</label>
-                <textarea
-                  className="w-full p-6 rounded-2xl border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300 resize-none text-lg shadow-inner"
-                  rows={10}
-                  placeholder="Masukkan daftar URL satu per baris&#10;&#10;Contoh:&#10;https://example.com&#10;https://google.com&#10;https://github.com"
-                  value={urlsText}
-                  onChange={e => setUrlsText(e.target.value)}
-                />
+                <div className="w-full rounded-2xl border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 shadow-inner textarea-scrollbar overflow-hidden" style={{ height: '320px' }}>
+                  <textarea
+                    className="w-full h-full p-6 pr-4 bg-transparent focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300 resize-none text-lg"
+                    rows={10}
+                    placeholder="Masukkan daftar URL satu per baris&#10;&#10;Contoh:&#10;https://example.com&#10;https://google.com&#10;https://github.com"
+                    value={urlsText}
+                    onChange={e => setUrlsText(e.target.value)}
+                    style={{ border: 'none', outline: 'none', boxShadow: 'none', borderRadius: '0', minHeight: '100%', maxHeight: '100%' }}
+                  />
+                </div>
               </div>
               <div className="flex flex-col justify-center space-y-4 lg:w-80 mt-0 lg:mt-0">
                 <button
