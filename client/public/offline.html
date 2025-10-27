@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Version Checker - Offline</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        padding: 20px;
+      }
+      .container {
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+      }
+      .icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+      }
+      h1 { 
+        margin: 0 0 1rem 0; 
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+      p { 
+        opacity: 0.9; 
+        line-height: 1.6; 
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+      }
+      .retry-btn {
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        font-weight: 500;
+        min-width: 200px;
+      }
+      .retry-btn:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+      }
+      .status {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+      .dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #ff6b6b;
+        border-radius: 50%;
+        margin-right: 8px;
+        animation: blink 1.5s infinite;
+      }
+      @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.3; }
+      }
+    </style>
+  </head>
+</html>

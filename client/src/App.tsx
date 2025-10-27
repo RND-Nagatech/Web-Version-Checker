@@ -16,6 +16,7 @@ function Toast({ message, type = 'success' }: { message: string; type?: 'error' 
 import React, { useState, useEffect } from 'react'
 import { CheckIcon, CloudIcon, MoonIcon, SunIcon } from './icons'
 
+
 type Result = {
   url: string;
   versi_klien?: string | null;
@@ -25,6 +26,95 @@ type Result = {
 
 export default function App() {
   const [toast, setToast] = useState<{ message: string; type?: 'error' | 'success' } | null>(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
+  const [showingCachedData, setShowingCachedData] = useState(false);
+
+  // Online/Offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setToast({ message: 'Koneksi kembali online!', type: 'success' });
+    };
+    
+    const handleOffline = () => {
+      setIsOnline(false);
+      setToast({ message: 'Mode offline - beberapa fitur terbatas', type: 'error' });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+    // Online/Offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setToast({ message: 'Koneksi kembali online!', type: 'success' });
+    };
+    
+    const handleOffline = () => {
+      setIsOnline(false);
+      setToast({ message: 'Mode offline - beberapa fitur terbatas', type: 'error' });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Register Service Worker
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+            
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    setUpdateAvailable(true);
+                    setWaitingWorker(newWorker);
+                    setToast({ message: 'Update tersedia! Klik untuk memperbarui.', type: 'success' });
+                  }
+                });
+              }
+            });
+
+            // Pre-cache additional resources after SW is ready
+            if (registration.active) {
+              console.log('Service Worker is active, pre-caching resources...');
+            }
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+  }, []);
+
+  const handleUpdate = () => {
+    if (waitingWorker) {
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+      setUpdateAvailable(false);
+      window.location.reload();
+    }
+  };
+
   // Auto-dismiss toast after 3 seconds
   useEffect(() => {
     if (toast) {
@@ -58,6 +148,12 @@ export default function App() {
       setToast({ message: 'Masukkan minimal 1 URL', type: 'error' });
       return;
     }
+
+    if (!isOnline) {
+      setToast({ message: 'Tidak dapat melakukan pengecekan saat offline', type: 'error' });
+      return;
+    }
+
     setLoading(true);
     setResults([]);
     setProgress(0);
@@ -153,7 +249,29 @@ export default function App() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12 relative">
-          <div className="absolute top-0 right-0">
+          <div className="absolute top-0 right-0 flex gap-4 items-center">
+            {/* Online/Offline Indicator - Simple text */}
+            <div className="flex items-center gap-1 text-xs font-medium">
+              <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <span className={`${isOnline ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                {isOnline ? 'Online' : 'Offline'}
+              </span>
+            </div>
+
+            {/* Update Available Button */}
+            {updateAvailable && (
+              <button 
+                onClick={handleUpdate}
+                className="p-4 rounded-2xl hover:bg-white/10 dark:hover:bg-gray-700/50 transition-all duration-300 shadow-xl backdrop-blur-sm bg-blue-500/20 dark:bg-blue-600/20 border border-blue-300/20 dark:border-blue-400/20 text-blue-700 dark:text-blue-300"
+                title="Update Available"
+              >
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                </svg>
+              </button>
+            )}
+
+            {/* Dark Mode Toggle */}
             <button onClick={() => setDark(d => !d)} className="p-4 rounded-2xl hover:bg-white/10 dark:hover:bg-gray-700/50 transition-all duration-300 shadow-xl backdrop-blur-sm bg-white/20 dark:bg-gray-800/20 border border-white/20 dark:border-gray-600/20">
               {dark ? <SunIcon /> : <MoonIcon />}
             </button>
@@ -266,7 +384,6 @@ export default function App() {
               </div>
             </div>
           </div>
-
           {/* Results Table */}
           <div className="overflow-hidden rounded-2xl border-2 border-gray-200 dark:border-gray-700 shadow-xl">
             <table className="w-full table-auto dark:bg-gray-900 bg-white">
@@ -361,9 +478,23 @@ export default function App() {
         {/* Footer */}
         <footer className="text-center mt-12">
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-200 dark:border-gray-700">
-            <p className="text-lg font-medium flex items-center justify-center gap-2">
+            <p className="text-lg font-medium flex items-center justify-center gap-2 mb-4">
                Pastikan nama website sesuai agar mendapatkan hasil yang optimal <span className="text-pink-500 text-xl"></span>
             </p>
+            <div className="flex items-center justify-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+              <span className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                PWA Ready
+              </span>
+              <span className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                Offline Support
+              </span>
+              <span className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                Auto Updates
+              </span>
+            </div>
           </div>
         </footer>
       </div>

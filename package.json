@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "sharp": "^0.34.4",
+    "vite-plugin-pwa": "^1.1.0",
+    "workbox-window": "^7.3.0"
+  }
+}
